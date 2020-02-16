@@ -1,3 +1,12 @@
+"""
+    File name         : KalmanFilter.py
+    File Description  : 1-D Object Tracking using Kalman Filter
+    Author            : Rahmad Sadli
+    Date created      : 15/02/2020
+    Date last modified: 16/02/2020
+    Python Version    : 3.7
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 
