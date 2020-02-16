@@ -27,19 +27,20 @@ class KalmanFilter(object):
 
         # Update time state
         self.x = np.dot(self.A, self.x) + np.dot(self.B, self.u)
+        
         # Calculate error covariance
-        # P= A*P*A' + Ex
+        # P= A*P*A' + Q
         self.P = np.dot(np.dot(self.A, self.P), self.A.T) + self.Q
         return self.x
 
     def update(self, z):
         # Ref :Eq.(11) , Eq.(11) and Eq.(13)
 
-        # S = H*P*H'+Ez
+        # S = H*P*H'+R
         S = np.dot(self.H, np.dot(self.P, self.H.T)) + self.R
 
         # Calculate the Kalman Gain
-        # K = P * H'* inv(H*P*H'+Ez)
+        # K = P * H'* inv(H*P*H'+R)
         K = np.dot(np.dot(self.P, self.H.T), np.linalg.inv(S))  #Eq.(11)
 
         self.x = np.round(self.x + np.dot(K, (z - np.dot(self.H, self.x))))   #Eq.(12)
