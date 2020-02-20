@@ -11,6 +11,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 class KalmanFilter(object):
     def __init__(self, dt, u, std_acc, std_meas):
         self.dt = dt
@@ -19,25 +20,25 @@ class KalmanFilter(object):
 
         self.A = np.matrix([[1, self.dt],
                             [0, 1]])
-        self.B = np.matrix([[(self.dt**2)/2], [self.dt]]) 
+        self.B = np.matrix([[(self.dt ** 2) / 2], [self.dt]])
 
-        self.H = np.matrix([[1,0]])
+        self.H = np.matrix([[1, 0]])
 
-        self.Q = np.matrix([[(self.dt**4)/4, (self.dt**3)/2],
-                            [(self.dt**3)/2, self.dt**2]]) * self.std_acc**2
-        self.R = std_meas**2
+        self.Q = np.matrix([[(self.dt ** 4) / 4, (self.dt ** 3) / 2],
+                            [(self.dt ** 3) / 2, self.dt ** 2]]) * self.std_acc ** 2
+        self.R = std_meas ** 2
 
         self.P = np.eye(self.A.shape[1])
 
-        #self.x = np.matrix([[np.random.uniform(-200, 15)], [0]])
-        self.x = np.matrix([[0],[0]])
+        # self.x = np.matrix([[np.random.uniform(-200, 15)], [0]])
+        self.x = np.matrix([[0], [0]])
 
     def predict(self):
         # Ref :Eq.(9) and Eq.(10)
 
         # Update time state
         self.x = np.dot(self.A, self.x) + np.dot(self.B, self.u)
-        
+
         # Calculate error covariance
         # P= A*P*A' + Q
         self.P = np.dot(np.dot(self.A, self.P), self.A.T) + self.Q
@@ -51,39 +52,37 @@ class KalmanFilter(object):
 
         # Calculate the Kalman Gain
         # K = P * H'* inv(H*P*H'+R)
-        K = np.dot(np.dot(self.P, self.H.T), np.linalg.inv(S))  #Eq.(11)
+        K = np.dot(np.dot(self.P, self.H.T), np.linalg.inv(S))  # Eq.(11)
 
-        self.x = np.round(self.x + np.dot(K, (z - np.dot(self.H, self.x))))   #Eq.(12)
+        self.x = np.round(self.x + np.dot(K, (z - np.dot(self.H, self.x))))  # Eq.(12)
 
         I = np.eye(self.H.shape[1])
-        self.P = (I - (K * self.H)) * self.P   #Eq.(13)
+        self.P = (I - (K * self.H)) * self.P  # Eq.(13)
 
 
 def main():
-
-    #print(x)
-    dt=0.1
-    #x = np.linspace(0, 1, (1//dt)+1)
-    x = np.arange(0, 20, dt)
+    # print(x)
+    dt = 0.1
+    # x = np.linspace(0, 1, (1//dt)+1)
+    x = np.arange(0, 80, dt)
 
     # Define a model track
-    real_track = 0.1*(x**2 - x)
+    real_track = 0.1 * (x ** 2 - x)
 
-
-    u=1.5
+    u = 1.5
     std_acc = 0.6
     std_meas = 3
 
-    noise_magnitude=20
+    noise_magnitude = 10
 
     # create KalmanFilter object
     kf = KalmanFilter(dt, u, std_acc, std_meas)
 
     predictions = []
-    measurements=[]
+    measurements = []
     for z in real_track:
-        #Mesurement
-        z=kf.H*z+ std_meas*np.random.normal(0, noise_magnitude, 1)
+        # Mesurement
+        z = kf.H * z + std_meas * np.random.uniform(-noise_magnitude, noise_magnitude)
 
         measurements.append(z.item(0))
         predictions.append(kf.predict()[0])
