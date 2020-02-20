@@ -19,12 +19,12 @@ class KalmanFilter(object):
 
         self.A = np.matrix([[1, self.dt],
                             [0, 1]])
-        self.B = np.matrix([[(self.dt**2)/2], [self.dt]]) * self.std_acc**2
+        self.B = np.matrix([[(self.dt**2)/2], [self.dt]]) 
 
         self.H = np.matrix([[1,0]])
 
         self.Q = np.matrix([[(self.dt**4)/4, (self.dt**3)/2],
-                            [(self.dt**3)/2, self.dt**2]])
+                            [(self.dt**3)/2, self.dt**2]]) * self.std_acc**2
         self.R = std_meas**2
 
         self.P = np.eye(self.A.shape[1])
@@ -67,14 +67,14 @@ def main():
     x = np.arange(0, 20, dt)
 
     # Define a model track
-    real_track = 0.25*(x**3 - 10*(x**2)) #+ 10*x + 15
-    #real =(x+3)*((x-2)**2)*((x + 1)**3)
+    real_track = 0.1*(x**2 - x)
 
 
     u=1.5
-    std_acc = 0.005
-    std_meas = 0.5
-    noise_magnitude = 25
+    std_acc = 0.6
+    std_meas = 3
+
+    noise_magnitude=20
 
     # create KalmanFilter object
     kf = KalmanFilter(dt, u, std_acc, std_meas)
