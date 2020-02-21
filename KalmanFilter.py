@@ -20,18 +20,21 @@ class KalmanFilter(object):
 
         self.A = np.matrix([[1, self.dt],
                             [0, 1]])
-        self.B = np.matrix([[(self.dt ** 2) / 2], [self.dt]])
+        self.B = np.matrix([[(self.dt**2)/2], [self.dt]])
 
         self.H = np.matrix([[1, 0]])
 
-        self.Q = np.matrix([[(self.dt ** 4) / 4, (self.dt ** 3) / 2],
-                            [(self.dt ** 3) / 2, self.dt ** 2]]) * self.std_acc ** 2
-        self.R = std_meas ** 2
+        self.Q = np.matrix([[(self.dt**4)/4, (self.dt**3)/2],
+                            [(self.dt**3)/2, self.dt**2]]) * self.std_acc**2
+
+        self.R = std_meas**2
 
         self.P = np.eye(self.A.shape[1])
-
-        # self.x = np.matrix([[np.random.uniform(-200, 15)], [0]])
+        
         self.x = np.matrix([[0], [0]])
+
+        print(self.Q)
+
 
     def predict(self):
         # Ref :Eq.(9) and Eq.(10)
@@ -46,7 +49,6 @@ class KalmanFilter(object):
 
     def update(self, z):
         # Ref :Eq.(11) , Eq.(11) and Eq.(13)
-
         # S = H*P*H'+R
         S = np.dot(self.H, np.dot(self.P, self.H.T)) + self.R
 
@@ -61,42 +63,41 @@ class KalmanFilter(object):
 
 
 def main():
-    # print(x)
     dt = 0.1
-    # x = np.linspace(0, 1, (1//dt)+1)
-    x = np.arange(0, 80, dt)
+    t = np.arange(0, 100, dt)
 
     # Define a model track
-    real_track = 0.1 * (x ** 2 - x)
+    real_track = 0.1*((t**2) - t)
 
-    u = 1.5
-    std_acc = 0.6
-    std_meas = 3
 
-    noise_magnitude = 10
+    u= 2
+    std_acc = 0.25     # we assume that the standard deviation of the acceleration is 0.25 (m/s^2)
+    std_meas = 1.2     # and standard deviation of the measurement is 1.2 (m)
 
     # create KalmanFilter object
     kf = KalmanFilter(dt, u, std_acc, std_meas)
 
     predictions = []
     measurements = []
-    for z in real_track:
+    for x in real_track:
         # Mesurement
-        z = kf.H * z + std_meas * np.random.uniform(-noise_magnitude, noise_magnitude)
+        z = kf.H * x + np.random.normal(0, 50)
 
         measurements.append(z.item(0))
         predictions.append(kf.predict()[0])
         kf.update(z.item(0))
 
+
     fig = plt.figure()
 
     fig.suptitle('Example of Kalman filter for tracking a moving object in 1-D', fontsize=20)
 
-    plt.plot(x, measurements, label='Measurements', color='b')
+    plt.plot(t, measurements, label='Measurements', color='b',linewidth=0.5)
 
-    plt.plot(x, np.squeeze(predictions), label='Kalman Filter Prediction', color='r')
+    plt.plot(t, np.array(real_track), label='Real Track', color='y', linewidth=1.5)
+    plt.plot(t, np.squeeze(predictions), label='Kalman Filter Prediction', color='r', linewidth=1.5)
 
-    plt.plot(x, np.array(real_track), label='Real Track', color='k')
+
     plt.xlabel('Time (s)', fontsize=20)
     plt.ylabel('Position (m)', fontsize=20)
     plt.legend()
